@@ -18,6 +18,7 @@ type Service = {
   price: number;
   estimatedTime: string;
   badge?: string;
+  productUrl?: string;
   included: string[];
   revisions: number;
 };
@@ -106,11 +107,12 @@ const services: Service[] = [
   },
   {
     id: 7,
-    name: 'Planilha Financeira',
+    name: 'PedeCusto',
     category: 'Organização Financeira',
-    description: 'Estrutura simples para organizar fluxo de caixa, despesas e receitas do negócio.',
+    description: 'Acesso ao PedeCusto para organizar fluxo de caixa, despesas e receitas do negócio.',
     price: 25,
     estimatedTime: '2-3 dias',
+    productUrl: 'https://custofacil.vercel.app/',
     included: ['Fluxo de caixa', 'Controle de despesas', 'Indicadores'],
     revisions: 2,
   },
@@ -147,9 +149,9 @@ const services: Service[] = [
 ];
 
 const servicesByCategory: Record<string, string[]> = {
-  confeitaria: ['Logo', 'Identidade Visual', 'Landing Page', 'Catálogo Digital', 'Kit Instagram', 'Planilha Financeira'],
+  confeitaria: ['Logo', 'Identidade Visual', 'Landing Page', 'Catálogo Digital', 'Kit Instagram', 'PedeCusto'],
   loja: ['Logo', 'Site Institucional', 'Catálogo Digital', 'Dashboard Financeiro', 'Automação WhatsApp'],
-  servicos: ['Logo', 'Landing Page', 'Kit Instagram', 'Chatbot', 'Planilha Financeira'],
+  servicos: ['Logo', 'Landing Page', 'Kit Instagram', 'Chatbot', 'PedeCusto'],
   restaurante: ['Logo', 'Identidade Visual', 'Catálogo Digital', 'Site Institucional', 'Automação WhatsApp'],
 };
 
@@ -734,6 +736,16 @@ export default function Home() {
                     <p className="text-2xl font-black text-cyan-300">{formatCurrency(service.price)}</p>
                   </div>
                   <div className="flex gap-2">
+                    {service.productUrl ? (
+                      <a
+                        href={service.productUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-full border border-emerald-400/30 px-3 py-2 text-sm text-emerald-200 transition hover:bg-emerald-400/10"
+                      >
+                        Acessar site
+                      </a>
+                    ) : null}
                     <button
                       onClick={() => {
                         setActiveService(service);
@@ -1157,6 +1169,11 @@ export default function Home() {
             </div>
 
             <div className="mt-6 flex justify-end">
+              {activeService.productUrl ? (
+                <a href={activeService.productUrl} target="_blank" rel="noreferrer" className="mr-auto rounded-full border border-emerald-400/30 px-5 py-3 font-semibold text-emerald-200">
+                  Conhecer o PedeCusto
+                </a>
+              ) : null}
               <button onClick={() => { addService(activeService.id); setModalOpen(false); }} className="rounded-full bg-cyan-400 px-5 py-3 font-semibold text-slate-950">Adicionar ao pedido</button>
             </div>
           </div>
