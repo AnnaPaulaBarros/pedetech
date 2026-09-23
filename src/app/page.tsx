@@ -361,12 +361,21 @@ export default function Home() {
     setAuthMessage('');
 
     const { data, error } = await supabase.auth.signInWithPassword({
-      email: authEmail,
+      email: authEmail.trim().toLowerCase(),
       password: authPassword,
     });
 
     if (error) {
-      setAuthMessage('Não foi possível entrar. Verifique o e-mail e a senha no Supabase.');
+      const message = error.message.toLowerCase();
+      if (message.includes('email not confirmed')) {
+        setAuthMessage('Confirme o e-mail do usuário no Supabase ou desative a confirmação de e-mail em Authentication > Providers > Email.');
+      } else if (message.includes('invalid login credentials')) {
+        setAuthMessage('E-mail ou senha incorretos. Use exatamente os dados cadastrados em Authentication > Users.');
+      } else if (message.includes('failed to fetch') || message.includes('network')) {
+        setAuthMessage('Não foi possível conectar ao Supabase. Confira as variáveis NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_ANON_KEY na Vercel.');
+      } else {
+        setAuthMessage(`Falha no login: ${error.message}`);
+      }
     } else if (data.user) {
       setAuthUser({ id: data.user.id, email: data.user.email });
       setAuthMessage(accessMode === 'admin' ? 'Sessão administrativa iniciada.' : 'Sessão do cliente iniciada.');
