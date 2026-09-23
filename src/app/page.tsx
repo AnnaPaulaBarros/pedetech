@@ -223,6 +223,7 @@ export default function Home() {
   const [servicesLoading, setServicesLoading] = useState(true);
   const [authEmail, setAuthEmail] = useState('maria@doceria.com');
   const [authPassword, setAuthPassword] = useState('');
+  const [authName, setAuthName] = useState('');
   const [authUser, setAuthUser] = useState<{ id: string; email?: string } | null>(null);
   const [authLoading, setAuthLoading] = useState(false);
   const [authMessage, setAuthMessage] = useState('');
@@ -385,6 +386,30 @@ export default function Home() {
     setAuthLoading(false);
   };
 
+  const handleSignUp = async () => {
+    setAuthLoading(true);
+    setAuthMessage('');
+
+    const { data, error } = await supabase.auth.signUp({
+      email: authEmail.trim().toLowerCase(),
+      password: authPassword,
+      options: {
+        data: { name: authName.trim() },
+      },
+    });
+
+    if (error) {
+      setAuthMessage(`Não foi possível criar a conta: ${error.message}`);
+    } else if (data.user && !data.session) {
+      setAuthMessage('Conta criada. Confira seu e-mail para confirmar o cadastro antes de entrar.');
+    } else if (data.user) {
+      setAuthUser({ id: data.user.id, email: data.user.email });
+      setAuthMessage('Conta criada e sessão iniciada.');
+    }
+
+    setAuthLoading(false);
+  };
+
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     setAuthMessage('Sessão encerrada.');
@@ -522,11 +547,13 @@ export default function Home() {
                 {accessMode === 'client' ? 'Login do cliente' : 'Login administrativo'}
               </p>
               <div className="mt-4 space-y-3">
+                {accessMode === 'client' ? <input value={authName} onChange={(event) => setAuthName(event.target.value)} placeholder="Seu nome" className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white" /> : null}
                 <input value={authEmail} onChange={(event) => setAuthEmail(event.target.value)} placeholder="seu@email.com" type="email" className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white" />
                 <input value={authPassword} onChange={(event) => setAuthPassword(event.target.value)} placeholder="Senha" type="password" className="w-full rounded-xl border border-white/10 bg-slate-900 px-3 py-2 text-sm text-white" />
                 <button onClick={handleAuth} disabled={authLoading || !authEmail || !authPassword} className="w-full rounded-full bg-cyan-400 px-4 py-2.5 font-semibold text-slate-950 disabled:cursor-not-allowed disabled:opacity-50">
                   {authLoading ? 'Entrando...' : accessMode === 'client' ? 'Entrar como cliente' : 'Entrar como admin'}
                 </button>
+                {accessMode === 'client' ? <button onClick={handleSignUp} disabled={authLoading || !authEmail || !authPassword} className="w-full rounded-full border border-cyan-400/30 px-4 py-2.5 font-semibold text-cyan-200 disabled:cursor-not-allowed disabled:opacity-50">Criar conta</button> : null}
                 {authUser ? <button onClick={handleSignOut} className="w-full rounded-full border border-white/10 px-4 py-2 text-sm text-slate-300">Sair ({authUser.email})</button> : null}
                 {authMessage ? <p className="text-sm text-cyan-200">{authMessage}</p> : null}
               </div>
